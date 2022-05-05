@@ -97,4 +97,3 @@ The pipeline in the project is as follows:
 >>>>>>> 3bae522 (Create README.md)
 =======
 [MIT](https://github.com/mftnakrsu/Automatic-number-plate-recognition-YOLO-OCR/blob/main/LICENSE)
->>>>>>> 34be8a0 (Update README.md)
