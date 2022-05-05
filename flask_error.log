@@ -1,0 +1,16 @@
+2026-04-13 10:54:08,068 ERROR Upload inference failed
+Traceback (most recent call last):
+  File "C:\Users\Abhijay R\Automatic_Number_Plate_Recognition_YOLO_OCR\app.py", line 565, in predict
+    save_results(plate_text, "ocr_results.csv", "Detection_Images")
+  File "C:\Users\Abhijay R\Automatic_Number_Plate_Recognition_YOLO_OCR\helper\general_utils.py", line 38, in save_results
+    with open(csv_filename, mode="a", newline="") as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+PermissionError: [Errno 13] Permission denied: 'ocr_results.csv'
+2026-04-13 10:55:40,583 ERROR Upload inference failed
+Traceback (most recent call last):
+  File "C:\Users\Abhijay R\Automatic_Number_Plate_Recognition_YOLO_OCR\app.py", line 565, in predict
+    save_results(plate_text, "ocr_results.csv", "Detection_Images")
+  File "C:\Users\Abhijay R\Automatic_Number_Plate_Recognition_YOLO_OCR\helper\general_utils.py", line 38, in save_results
+    with open(csv_filename, mode="a", newline="") as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+PermissionError: [Errno 13] Permission denied: 'ocr_results.csv'
