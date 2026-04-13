@@ -1,8 +1,12 @@
+from pathlib import Path
+
 import torch
 
 
 class Parameters:
     def __init__(self):
+        project_root = Path(__file__).resolve().parents[1]
+        model_path = project_root / "model" / "best.pt"
 
         self.weights = "best.pt"
 
@@ -25,9 +29,11 @@ class Parameters:
         self.rect_thickness = 3
 
         self.rect_size = 15000
+        self.ocr_every_n_frames = 5
+        self.ocr_input_width = 320
 
         self.pred_shape = (480, 640, 3)
         self.vis_shape = (800, 600)
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-        self.model = "/home/mef/Documents/plate_detection_project/best.pt"
+        self.model = str(model_path)

@@ -45,6 +45,8 @@ Clone repo and install requirements.txt in a Python>=3.7.0 environment.
     cd Automatic-number-plate-recognition-YOLO-OCR
     pip install -r requirements.txt  # install
 
+Note: the current runtime path uses `easyocr` and `pytesseract`; `tensorflow`/`keras_ocr` are not required for `main.py` and were removed from the default requirements to avoid install failures on newer Python versions.
+
 ## Usage
 
 After the req libraries are installed, you can run the project by main.py.

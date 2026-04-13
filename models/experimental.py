@@ -105,7 +105,11 @@ def attempt_load(weights, map_location=None, inplace=True, fuse=True):
     # Loads an ensemble of models weights=[a,b,c] or a single model weights=[a] or weights=a
     model = Ensemble()
     for w in weights if isinstance(weights, list) else [weights]:
-        ckpt = torch.load(attempt_download(w), map_location=map_location)  # load
+        # PyTorch 2.6+ defaults `weights_only=True`, but this legacy YOLOv5
+        # checkpoint stores full model objects and must be loaded accordingly.
+        ckpt = torch.load(
+            attempt_download(w), map_location=map_location, weights_only=False
+        )  # load
         ckpt = (ckpt.get("ema") or ckpt["model"]).float()  # FP32 model
         model.append(
             ckpt.fuse().eval() if fuse else ckpt.eval()

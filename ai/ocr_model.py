@@ -1,6 +1,5 @@
 import cv2
 import os
-import keras_ocr
 import numpy as np
 import pytesseract
 import easyocr
@@ -16,7 +15,9 @@ def easyocr_model_load():
     :return: The text_reader is being returned.
     """
 
-    text_reader = easyocr.Reader(["en"])  # Initialzing the ocr
+    text_reader = easyocr.Reader(
+        ["en"], gpu=params.device.type == "cuda"
+    )  # Initialize OCR
     return text_reader
 
 

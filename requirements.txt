@@ -1,27 +1,20 @@
-tensorflow==2.14.1
-matplotlib==3.5.1
-torch==1.13.1
-pandas==1.2.4
-seaborn==0.11.1
-opencv_python_headless==4.5.5.62
-Flask==1.1.2
-onnxruntime==1.10.0
-easyocr==1.4.1
-coremltools==5.2.0
-torchvision==0.9.1
-requests==2.25.1
-psutil==5.8.0
-numpy==1.22.0
-scipy==1.4.1
-tqdm==4.63.0
-openvino==2021.4.2
-pytesseract==0.3.9
-albumentations==1.1.0
-export==0.2.0
-ipython==8.10.0
-keras_ocr==0.8.9
-pafy==0.5.5
-Pillow==9.3.0
-PyYAML==6.0
-tensorrt==0.0.1.dev5
+# Runtime dependencies for the ANPR app on modern Python.
+# Older pinned packages from the original repo were removed because they no
+# longer publish wheels for current Python releases.
 
+torch>=2.2,<2.12
+torchvision>=0.17,<0.22
+numpy>=1.26,<3
+opencv-python-headless>=4.8,<5
+Pillow>=10,<12
+PyYAML>=6,<7
+requests>=2.31,<3
+psutil>=5.9,<8
+tqdm>=4.66,<5
+matplotlib>=3.8,<4
+pandas>=2.2,<3
+seaborn>=0.13,<0.14
+scipy>=1.11,<2
+Flask>=3.0,<4
+easyocr>=1.7,<2
+pytesseract>=0.3.10,<0.4

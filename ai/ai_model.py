@@ -9,6 +9,20 @@ from cv2 import VideoCapture
 from utils.params import Parameters
 
 params = Parameters()
+_CAN_SHOW_WINDOWS = None
+
+
+def safe_imshow(window_name, image):
+    global _CAN_SHOW_WINDOWS
+
+    if _CAN_SHOW_WINDOWS is False:
+        return
+
+    try:
+        cv2.imshow(window_name, image)
+        _CAN_SHOW_WINDOWS = True
+    except cv2.error:
+        _CAN_SHOW_WINDOWS = False
 
 
 def load_yolov5_model():
@@ -66,6 +80,7 @@ def detection(frame, model, names):
     pred = non_max_suppression(pred, params.conf_thres, max_det=params.max_det)
 
     label = ""
+    plate_crop = None
     # detections per image
     for i, det in enumerate(pred):
 
@@ -110,14 +125,10 @@ def detection(frame, model, names):
                 x2 = int(xyxy[2].item())
                 y2 = int(xyxy[3].item())
 
-                confidence_score = conf
-                class_index = cls
-                object_name = names[int(cls)]
-
-                detected_plate = (
-                    frame[:, :, y1:y2, x1:x2].squeeze().permute(1, 2, 0).cpu().numpy()
-                )
-                cv2.imshow("Crooped Plate ", detected_plate)
+                detected_plate = out[y1:y2, x1:x2].copy()
+                if detected_plate.size:
+                    plate_crop = detected_plate
+                    safe_imshow("Crooped Plate ", detected_plate)
 
                 # rect_size= (detected_plate.shape[0]*detected_plate.shape[1])
                 c = int(cls)  # integer class
@@ -148,7 +159,7 @@ def detection(frame, model, names):
                         lineType=cv2.LINE_AA,
                     )
 
-    return out, label
+    return out, label, plate_crop
     # fps = 'FPS: {0:.2f}'.format(frame_rate_calc)
     # label_size, base_line = cv2.getTextSize(fps, cv2.FONT_HERSHEY_SIMPLEX, params.font_scale, params.thickness)
     # label_ymin = max(params.fps_y, label_size[1] + 10)

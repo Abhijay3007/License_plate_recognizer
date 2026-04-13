@@ -1,73 +1,98 @@
 <!doctype html>
-
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="stylesheet" href="//stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
-    <style>
-      .bd-placeholder-img {
-        font-size: 1.125rem;
-        text-anchor: middle;
-      }
-
-      @media (min-width: 768px) {
-        .bd-placeholder-img-lg {
-          font-size: 3.5rem;
-        }
-      }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ANPR Web UI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/style.css">
-
-    <title>Meftun AKARSU</title>
   </head>
-  <body class="text-center">
-    
-    <form class="form-signin" method=post enctype=multipart/form-data>
-        <h1 class="h3 mb-3 font-weight-normal">Upload any image</h1>
-        <input type="file" name="file" class="form-control-file" id="inputfile">
-        <br/>
-        <button class="btn btn-lg btn-primary btn-block" type="submit">Upload</button>
-        <p class="mt-5 mb-3 text-muted">Built using Pytorch & Flask</p>
-    </form>
-    <script src="//code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
-    <script src="//stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
-    <script type="text/javascript">
-      $('#inputfile').bind('change', function() {
-          let fileSize = this.files[0].size/1024/1024; // this gives in MB
-          if (fileSize > 10) {
-            $("#inputfile").val(null);
-            alert('file is too big. images more than 10MB are not allowed')
-            return
-          }
-
-          let ext = $('#inputfile').val().split('.').pop().toLowerCase();
-          if($.inArray(ext, ['jpg','jpeg']) == -1) {
-            $("#inputfile").val(null);
-            alert('only jpeg/jpg files are allowed!');
-          }
-      });
-    </script>
-  </body>
-</html>
-
-<!DOCTYPE html>
-<html>
-
-
   <body>
-    <h1>Meftun AKARSU</h1>
-    <div>
-      
+    <div class="page-shell">
+      <div class="ambient ambient-left"></div>
+      <div class="ambient ambient-right"></div>
 
-        <img src="{{ url_for('video') }}" width="80%" />
+      <main class="layout">
+        <section class="hero-card">
+          <div class="hero-copy">
+            <p class="eyebrow">Vision Pipeline</p>
+            <h1>Automatic Number Plate Recognition</h1>
+            <p class="hero-text">
+              Upload a vehicle image to detect the plate, extract OCR text, and inspect the model's best registration candidates.
+            </p>
+            <div class="hero-meta">
+              <span>YOLO detection</span>
+              <span>OCR cleanup</span>
+              <span>Plate candidate ranking</span>
+            </div>
+          </div>
+        </section>
 
+        <form class="upload-card upload-card-standalone" method="post" enctype="multipart/form-data">
+          <label class="upload-label" for="file">
+            <span class="upload-title">Choose Vehicle Image</span>
+            <span class="upload-subtitle">JPG, PNG, BMP, or WEBP</span>
+          </label>
+          <input id="file" type="file" name="file" accept=".jpg,.jpeg,.png,.bmp,.webp">
+          <button type="submit">Detect Plate</button>
+        </form>
 
-        
+        {% if error %}
+          <section class="message-card message-error">
+            <strong>Upload Error</strong>
+            <p>{{ error }}</p>
+          </section>
+        {% endif %}
+
+        {% if warning %}
+          <section class="message-card">
+            <strong>Notice</strong>
+            <p>{{ warning }}</p>
+          </section>
+        {% endif %}
+
+        {% if plate_text %}
+          <section class="results-grid">
+            <article class="result-card result-primary">
+              <div class="section-head">
+                <span class="section-kicker">Best Match</span>
+                <h2>Detected Registration</h2>
+              </div>
+              <div class="plate-pill">{{ plate_text }}</div>
+              <p class="section-note">This is the highest-ranked candidate after OCR cleanup and plate-format correction.</p>
+            </article>
+
+            {% if candidates %}
+              <article class="result-card">
+                <div class="section-head">
+                  <span class="section-kicker">Alternates</span>
+                  <h2>Top Candidates</h2>
+                </div>
+                <div class="candidate-list">
+                  {% for candidate in candidates %}
+                    <div class="candidate-item">
+                      <span class="candidate-rank">{{ loop.index }}</span>
+                      <span class="candidate-text">{{ candidate }}</span>
+                    </div>
+                  {% endfor %}
+                </div>
+              </article>
+            {% endif %}
+
+            {% if image_url %}
+              <article class="result-card result-image">
+                <div class="section-head">
+                  <span class="section-kicker">Detection View</span>
+                  <h2>Processed Image</h2>
+                </div>
+                <img src="{{ image_url }}" alt="Detected number plate result">
+              </article>
+            {% endif %}
+          </section>
+        {% endif %}
+      </main>
     </div>
-            
-    </body>
-
-
+  </body>
 </html>
