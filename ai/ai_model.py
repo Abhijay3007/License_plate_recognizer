@@ -50,20 +50,32 @@ def detection(frame, model, names):
     :param names: a list of class names
     :return: the image with the bounding boxes and the label of the detected object.
     """
+    annotated_frame, detections = detect_plate_regions(frame, model, names)
+    label = detections[0]["label"] if detections else ""
+    plate_crop = detections[0]["crop"] if detections else None
+    return annotated_frame, label, plate_crop
+
+
+def detect_plate_regions(frame, model, names):
+    """
+    Run YOLOv5 on the frame and return the annotated frame plus structured
+    detection metadata for downstream features such as heatmaps and speed
+    estimation.
+    """
     out = frame.copy()
 
-    frame = cv2.resize(
-        frame,
-        (params.pred_shape[1], params.pred_shape[0]),
-        interpolation=cv2.INTER_LINEAR,
-    )
-    frame = np.transpose(frame, (2, 1, 0))
+    from utils.augmentations import letterbox
+    frame = letterbox(frame, new_shape=(params.pred_shape[0], params.pred_shape[1]), auto=False)[0]
+    
+    # YOLO expects CHW and RGB order
+    frame = frame.transpose((2, 0, 1))[::-1]
+    frame = np.ascontiguousarray(frame)
 
     cudnn.benchmark = True  # set True to speed up constant image size inference
 
     if params.device.type != "cpu":
         model(
-            torch.zeros(1, 3, params.imgsz, params.imgsz)
+            torch.zeros(1, 3, params.pred_shape[0], params.pred_shape[1])
             .to(params.device)
             .type_as(next(model.parameters()))
         )  # run once
@@ -74,13 +86,10 @@ def detection(frame, model, names):
     if frame.ndimension() == 3:
         frame = frame.unsqueeze(0)
 
-    frame = torch.transpose(frame, 2, 3)
-
     pred = model(frame, augment=False)[0]
     pred = non_max_suppression(pred, params.conf_thres, max_det=params.max_det)
 
-    label = ""
-    plate_crop = None
+    detections = []
     # detections per image
     for i, det in enumerate(pred):
 
@@ -118,21 +127,44 @@ def detection(frame, model, names):
                 n = (det[:, -1] == c).sum()  # detections per class
                 s_ += f"{n} {names[int(c)]}{'s' * (n > 1)}, "  # add to string
 
-            for *xyxy, conf, cls in reversed(det):
+            ordered_detections = sorted(det, key=lambda row: float(row[4]), reverse=True)
+            for *xyxy, conf, cls in ordered_detections:
 
                 x1 = int(xyxy[0].item())
                 y1 = int(xyxy[1].item())
                 x2 = int(xyxy[2].item())
                 y2 = int(xyxy[3].item())
 
-                detected_plate = out[y1:y2, x1:x2].copy()
+                # Add a small 10% padding around the YOLO crop
+                cw = x2 - x1
+                ch = y2 - y1
+                px = max(2, int(cw * 0.10))
+                py = max(2, int(ch * 0.10))
+
+                cx1 = max(0, x1 - px)
+                cy1 = max(0, y1 - py)
+                cx2 = min(out.shape[1], x2 + px)
+                cy2 = min(out.shape[0], y2 + py)
+
+                detected_plate = out[cy1:cy2, cx1:cx2].copy()
                 if detected_plate.size:
-                    plate_crop = detected_plate
-                    safe_imshow("Crooped Plate ", detected_plate)
+                    safe_imshow("Cropped Plate", detected_plate)
 
                 # rect_size= (detected_plate.shape[0]*detected_plate.shape[1])
                 c = int(cls)  # integer class
                 label = names[c] if params.hide_conf else f"{names[c]} {conf:.2f}"
+
+                detections.append(
+                    {
+                        "bbox": (x1, y1, x2, y2),
+                        "confidence": float(conf.item()),
+                        "class_id": c,
+                        "class_name": names[c],
+                        "label": label,
+                        "crop": detected_plate if detected_plate.size else None,
+                        "center": ((x1 + x2) / 2.0, (y1 + y2) / 2.0),
+                    }
+                )
 
                 tl = params.rect_thickness
 
@@ -159,7 +191,7 @@ def detection(frame, model, names):
                         lineType=cv2.LINE_AA,
                     )
 
-    return out, label, plate_crop
+    return out, detections
     # fps = 'FPS: {0:.2f}'.format(frame_rate_calc)
     # label_size, base_line = cv2.getTextSize(fps, cv2.FONT_HERSHEY_SIMPLEX, params.font_scale, params.thickness)
     # label_ymin = max(params.fps_y, label_size[1] + 10)

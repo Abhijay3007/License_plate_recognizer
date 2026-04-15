@@ -12,6 +12,7 @@ from werkzeug.exceptions import HTTPException
 
 from ai.ai_model import detection, load_yolov5_model
 from ai.ocr_model import easyocr_model_load
+from features.plate_lookup import lookup_plate_record
 from helper.general_utils import filter_text, save_results
 from helper.params import Parameters
 
@@ -550,6 +551,7 @@ def predict():
     candidates = []
     error = None
     warning = None
+    watchlist_alert = None
 
     if request.method == "POST":
         file = request.files.get("file")
@@ -563,6 +565,13 @@ def predict():
                 candidates = texts[:5]
                 if texts:
                     plate_text = texts[0]
+                    
+                    # Check watchlist for detected plate
+                    watchlist_alert = lookup_plate_record(
+                        plate_text,
+                        Path("features") / "data" / "vehicle_watchlist.json"
+                    )
+                    
                     try:
                         save_results(plate_text, "ocr_results.csv", "Detection_Images")
                     except PermissionError:
@@ -597,6 +606,7 @@ def predict():
         candidates=candidates,
         error=error,
         warning=warning,
+        watchlist_alert=watchlist_alert,
     )
 
 

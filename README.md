@@ -1,110 +1,90 @@
-<<<<<<< HEAD
-# License_plate_recognizer
+# Vehicle License Plate Recognition with YOLOv5 + OCR
 
-=======
-# Automatic Number Plate Recognition
+This project detects a vehicle number plate with **YOLOv5**, extracts the text with **EasyOCR/Tesseract-style OCR tooling**, and now includes extra ML-system features that make it stronger as a semester project:
 
-![dataset-cover](https://user-images.githubusercontent.com/57320216/166916670-03dfabe1-8c6c-471a-875c-8715354aa957.jpg)
+- Plate format validation for fake or tampered plate flagging
+- Local watchlist lookup to simulate a traffic surveillance alert system
+- Dual-frame speed estimation from plate movement
+- Detection confidence heatmap export
+- SQLite session logging with CSV/PDF export
 
-**Automatic Number Plate Recognition (ANPR)** is the process of reading the characters on the plate with various optical character recognition (OCR) methods by separating the plate region on the vehicle image obtained from automatic plate recognition.
+## Project Structure
 
-## Table of Content
+```text
+features/
+  data/
+    vehicle_watchlist.json
+  heatmap.py
+  pipeline.py
+  plate_lookup.py
+  plate_validation.py
+  session_logger.py
+  speed_estimation.py
+streamlit_app.py
+main.py
+app.py
+```
 
-- [Automatic Number Plate Recognition](#automatic-number-plate-recognition)
+## Install
 
-  * [What will you learn this project ](#what-will-you-learn-this-project)
-  * [Dataset](#dataset)
-  * [Installation](#installation)
-  * [Usage](#usage)
-  * [Project architecture](#project-architecture)
-  * [Some Result](#some-result)
-  * [Source](#source)
-  * [Licence](#licence)
+```bash
+pip install -r requirements.txt
+```
 
+## Run the Streamlit Dashboard
 
-## What will you learn this project 
+```bash
+streamlit run streamlit_app.py
+```
 
-* Custom Object Detection
-* Scene Text Detection
-* Scene Text Recognation
-* Optic Character Recognation
-* EasyOCR, PaddleOCR
-* Database,CSV format
-* Applying project in Real Time
-* Flask
-## Dataset
-The dataset I use for license plate detection:  
+## Streamlit Workflow
 
-https://www.kaggle.com/datasets/andrewmvd/car-plate-detection
+1. Upload one vehicle image to run plate detection and OCR.
+2. Review the recognized plate, validation result, watchlist alert, and heatmap.
+3. Upload two frames of the same vehicle for speed estimation.
+4. Export the session log as CSV or PDF from the dashboard.
 
-## Installation
+## New Feature Summary
 
-Clone repo and install requirements.txt in a Python>=3.7.0 environment.
+### 1. Fake / Tampered Plate Flagging
 
-    git clone https://github.com/mftnakrsu/Automatic-number-plate-recognition-YOLO-OCR.git  # clone
-    cd Automatic-number-plate-recognition-YOLO-OCR
-    pip install -r requirements.txt  # install
+`features/plate_validation.py` checks OCR text against Indian registration rules using regex and basic structural checks. It labels results as:
 
-Note: the current runtime path uses `easyocr` and `pytesseract`; `tensorflow`/`keras_ocr` are not required for `main.py` and were removed from the default requirements to avoid install failures on newer Python versions.
+- `VALID`
+- `SUSPICIOUS`
+- `INVALID`
 
-## Usage
+### 2. Plate Lookup Simulation
 
-After the req libraries are installed, you can run the project by main.py.
+`features/plate_lookup.py` searches a local JSON watchlist:
 
-    python main.py
+- stolen vehicles
+- flagged owners
+- expired registration
 
-## Project architecture
+Sample records live in `features/data/vehicle_watchlist.json`.
 
-The pipeline in the project is as follows:  
+### 3. Speed Estimation
 
-![images](https://github.com/mftnakrsu/Automatic-number-plate-recognition-YOLO-OCR/blob/main/imgs/flowchart.png)
+`features/speed_estimation.py` compares plate center movement between two frames and converts displacement into approximate speed using:
 
-- Custom object detection with plate extraction using yolov5
-- Apply the extracted plate to EasyOCR and PaddleOCR
-- Get plate text
-- Filter text
-- Write Database and CSV format
-- Upload to Flask  
+```text
+speed = pixel_shift × meters_per_pixel ÷ time_interval
+```
 
+### 4. Detection Confidence Heatmap
 
-## Some Result
+`features/heatmap.py` creates a confidence-focused overlay from YOLO detections and saves the annotated output in `exports/heatmaps/`.
 
-* As you can see, first step is detect the plate with using Yolov5. 
+### 5. Session Logging and Export
 
-![images](https://github.com/mftnakrsu/Automatic-number-plate-recognition-YOLO-OCR/blob/main/imgs/realtime.png)
+`features/session_logger.py` stores every analysis result in SQLite and exports logs as:
 
-* After detect plate, apply the ocr. Paddle ocr Easy ocr for recognizing plate.  
+- CSV
+- PDF
 
-![images](https://github.com/mftnakrsu/Automatic-number-plate-recognition-YOLO-OCR/blob/main/imgs/plate_recog.jpg)
+## Notes
 
-* Then write csv or database, when put it all in one.  
-
-![images](https://github.com/mftnakrsu/Automatic-number-plate-recognition-YOLO-OCR/blob/main/imgs/all.png)
-
-* The last step is Flask :) Actually, I didn't have time to integrate all the code in Flask. I just uploaded the yolov5 part. If you do, don't forget to pull request :)  
-
-![images](https://github.com/mftnakrsu/Automatic-number-plate-recognition-YOLO-OCR/blob/main/imgs/flask_test.png)
-
-
-## Similar work
-A streamlit based implementation of Automatic Number Plate Recognition for cars and other vehicles using images or live camera feed.
-
-![Animation](https://user-images.githubusercontent.com/29462447/168389056-9f39b89d-1221-432b-878d-578d9114d466.gif)
-![live feed demo](https://user-images.githubusercontent.com/29462447/168389042-c06f3dd2-5047-4138-8c11-07372d63046a.gif)
-
-The entire code for the webapp can be found [here.](https://github.com/prateekralhan/Streamlit-based-Automatic-Number-Plate-Recognition)
-
-
-## Source  
-- https://docs.python.org/3/library/csv.html  
-- https://github.com/ultralytics/yolov5  
-- https://github.com/PaddlePaddle/PaddleOCR
-- https://medium.com/move-on-ai/yolov5-object-detection-with-your-own-dataset-6e3823a8f66b  
-- https://github.com/JaidedAI/EasyOCR  
--     https://www.researchgate.net/publication/319198085_License_Number_Plate_Recognition_System_using_Entropy_basedFeatures_Selection_Approach_with_SVM/figures?lo=1&utm_source=google&utm_medium=organic
-
-## Licence
-<<<<<<< HEAD
->>>>>>> 3bae522 (Create README.md)
-=======
-[MIT](https://github.com/mftnakrsu/Automatic-number-plate-recognition-YOLO-OCR/blob/main/LICENSE)
+- Best results come from clear front or rear vehicle images.
+- For speed estimation, use a fixed camera and a realistic calibration factor.
+- The included watchlist is only a local simulation for demonstration.

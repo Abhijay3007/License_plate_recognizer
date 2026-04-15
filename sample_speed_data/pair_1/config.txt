@@ -1,0 +1,4 @@
+time_interval_seconds=0.85
+meters_per_pixel=0.05
+pixel_shift_x=18
+pixel_shift_y=0

@@ -9,6 +9,8 @@ from helper.general_utils import save_results
 from ai.ocr_model import easyocr_model_load
 from ai.ocr_model import easyocr_model_works
 from utils.visual_utils import *
+from features.plate_lookup import lookup_plate_record
+from pathlib import Path
 
 import cv2
 from datetime import datetime
@@ -95,8 +97,35 @@ if __name__ == "__main__":
                 )
                 if text:
                     # Save the most recent OCR result when a plate was actually read.
-                    save_results(text[-1], "ocr_results.csv", "Detection_Images")
-                    print(text)
+                    detected_plate = text[-1]
+                    save_results(detected_plate, "ocr_results.csv", "Detection_Images")
+                    print(f"Detected Plate: {detected_plate}")
+                    
+                    # Check watchlist for detected plate
+                    watchlist_result = lookup_plate_record(
+                        detected_plate,
+                        Path("features") / "data" / "vehicle_watchlist.json"
+                    )
+                    
+                    if watchlist_result["match_found"]:
+                        alert_level = watchlist_result["alert_level"]
+                        reasons = watchlist_result["reasons"]
+                        record = watchlist_result["record"]
+                        
+                        if alert_level == "HIGH":
+                            print(f"\n🚨 HIGH ALERT - Watchlist Match Found! 🚨")
+                        else:
+                            print(f"\n⚠️  MEDIUM ALERT - Watchlist Match Found")
+                        
+                        print(f"Plate Number: {detected_plate}")
+                        print(f"Alert Level: {alert_level}")
+                        print(f"Reasons: {', '.join(reasons)}")
+                        if record:
+                            print(f"Owner: {record.get('owner_name', 'Unknown')}")
+                            print(f"Vehicle Type: {record.get('vehicle_type', 'Unknown')}")
+                            print(f"Registration Status: {record.get('registration_status', 'Unknown')}")
+                            print(f"Notes: {record.get('notes', 'N/A')}")
+                        print()
             safe_imshow("detected", detected)
 
         if safe_wait_key(1) & 0xFF == 27:

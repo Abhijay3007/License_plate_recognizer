@@ -53,6 +53,38 @@
           </section>
         {% endif %}
 
+        {% if watchlist_alert and watchlist_alert.match_found %}
+          <section class="message-card message-watchlist-{{ watchlist_alert.alert_level | lower }}">
+            <div class="alert-header">
+              {% if watchlist_alert.alert_level == "HIGH" %}
+                <strong>🚨 HIGH PRIORITY ALERT</strong>
+              {% else %}
+                <strong>⚠️ MEDIUM PRIORITY ALERT</strong>
+              {% endif %}
+            </div>
+            <p><strong>Watchlist Match Found!</strong></p>
+            <div class="alert-details">
+              <p><strong>Plate:</strong> {{ watchlist_alert.plate_number }}</p>
+              <p><strong>Alert Level:</strong> {{ watchlist_alert.alert_level }}</p>
+              <p><strong>Reasons:</strong></p>
+              <ul>
+                {% for reason in watchlist_alert.reasons %}
+                  <li>{{ reason }}</li>
+                {% endfor %}
+              </ul>
+              {% if watchlist_alert.record %}
+                <p><strong>Vehicle Details:</strong></p>
+                <ul>
+                  <li><strong>Owner:</strong> {{ watchlist_alert.record.owner_name }}</li>
+                  <li><strong>Vehicle Type:</strong> {{ watchlist_alert.record.vehicle_type }}</li>
+                  <li><strong>Registration Status:</strong> {{ watchlist_alert.record.registration_status }}</li>
+                  <li><strong>Notes:</strong> {{ watchlist_alert.record.notes }}</li>
+                </ul>
+              {% endif %}
+            </div>
+          </section>
+        {% endif %}
+
         {% if plate_text %}
           <section class="results-grid">
             <article class="result-card result-primary">

@@ -1,0 +1,29 @@
+[
+  {
+    "plate_number": "KA01AB1234",
+    "owner_name": "Rahul Mehta",
+    "vehicle_type": "Sedan",
+    "stolen": true,
+    "flagged_owner": false,
+    "registration_status": "active",
+    "notes": "Reported stolen near Bengaluru on 2026-03-29."
+  },
+  {
+    "plate_number": "MH12DE3434",
+    "owner_name": "Abhijeet Patil",
+    "vehicle_type": "SUV",
+    "stolen": false,
+    "flagged_owner": true,
+    "registration_status": "active",
+    "notes": "Drunk and Drive case"
+  },
+  {
+    "plate_number": "DL08CQ7788",
+    "owner_name": "Shivam Arora",
+    "vehicle_type": "Hatchback",
+    "stolen": false,
+    "flagged_owner": false,
+    "registration_status": "expired",
+    "notes": "Registration expired last month."
+  }
+]

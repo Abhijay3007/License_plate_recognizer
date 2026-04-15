@@ -11,7 +11,7 @@ class Parameters:
         self.weights = "best.pt"
 
         self.imgsz = 640
-        self.conf_thres = 0.25
+        self.conf_thres = 0.05
         self.max_det = 1000
         self.hide_conf = True
 

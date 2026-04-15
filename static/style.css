@@ -213,6 +213,45 @@ button:active {
   color: var(--error-text);
 }
 
+.message-watchlist-high {
+  background: #ffe6e6;
+  color: #a23a2a;
+  border: 1px solid #ff9999;
+  border-radius: var(--radius-md);
+}
+
+.message-watchlist-medium {
+  background: #fff9e6;
+  color: #8b6f00;
+  border: 1px solid #ffd700;
+  border-radius: var(--radius-md);
+}
+
+.message-card .alert-header {
+  margin-bottom: 12px;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.message-card .alert-details {
+  margin-top: 12px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.message-card .alert-details p {
+  margin: 8px 0;
+}
+
+.message-card .alert-details ul {
+  margin: 8px 0 8px 20px;
+  padding: 0;
+}
+
+.message-card .alert-details li {
+  margin: 4px 0;
+}
+
 .message-card strong {
   display: block;
   margin-bottom: 6px;
