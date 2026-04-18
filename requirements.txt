@@ -2,8 +2,8 @@
 # Older pinned packages from the original repo were removed because they no
 # longer publish wheels for current Python releases.
 
-torch>=2.2,<2.12
-torchvision>=0.17,<0.22
+torch>=2.2
+torchvision>=0.17
 numpy>=1.26,<3
 opencv-python-headless>=4.8,<5
 Pillow>=10,<12
